@@ -227,7 +227,7 @@ function Builder:format_line(indent_markers, arrows, icon, name, node)
     end
     for _, v in ipairs(t2) do
       if added_len > 0 then
-        table.insert(t1, { str = self.opts.renderer.icons.padding })
+        table.insert(t1, { str = M.opts.renderer.icons.padding })
       end
       table.insert(t1, v)
     end
@@ -241,24 +241,32 @@ function Builder:format_line(indent_markers, arrows, icon, name, node)
   end
 
   local line = { indent_markers, arrows }
+
+  local arrow_index = 1
+  local arrow_filenames = vim.g.arrow_filenames
+  if arrow_filenames then
+    for i, filename in ipairs(arrow_filenames) do
+      if string.sub(node.absolute_path, -#filename) == filename then
+        local statusline = require("arrow.statusline")
+        arrow_index = statusline.text_for_statusline(_, i)
+        line[1].str = string.sub(line[1].str, 1, -3)
+        line[2].str = "(" .. arrow_index .. ") "
+        line[2].hl = { "ArrowFileIndex" }
+        break
+      end
+    end
+  end
+
   add_to_end(line, { icon })
 
-  for i = #self.decorators, 1, -1 do
-    add_to_end(line, self.decorators[i]:icons_before(node))
+  for i = #M.decorators, 1, -1 do
+    add_to_end(line, M.decorators[i]:icons_before(node))
   end
 
   add_to_end(line, { name })
 
-  for i = #self.decorators, 1, -1 do
-    add_to_end(line, self.decorators[i]:icons_after(node))
-  end
-
-  local rights = {}
-  for i = #self.decorators, 1, -1 do
-    add_to_end(rights, self.decorators[i]:icons_right_align(node))
-  end
-  if #rights > 0 then
-    self.extmarks[self.index] = rights
+  for i = #M.decorators, 1, -1 do
+    add_to_end(line, M.decorators[i]:icons_after(node))
   end
 
   return line
@@ -405,7 +413,7 @@ function Builder:add_hidden_count_string(node, idx, num_children)
     -- if we change the traversal, we might need to sort by depth before rendering `self.virtual_lines`
     -- to maintain proper ordering of parent and child folder hidden count info.
     table.insert(self.virtual_lines[line_nr], {
-      { indent_string,                                                                      indent_markers.hl },
+      { indent_string, indent_markers.hl },
       { string.rep(indent_padding, (node.parent == nil and 0 or 1)) .. hidden_count_string, "NvimTreeHiddenDisplay" },
     })
   end
@@ -474,8 +482,8 @@ function Builder:build_header()
     local filter_line = string.format("%s/%s/", self.opts.live_filter.prefix, self.explorer.live_filter.filter)
     table.insert(self.lines, filter_line)
     local prefix_length = string.len(self.opts.live_filter.prefix)
-    self:insert_highlight({ "NvimTreeLiveFilterPrefix" }, 0,             prefix_length)
-    self:insert_highlight({ "NvimTreeLiveFilterValue" },  prefix_length, string.len(filter_line))
+    self:insert_highlight({ "NvimTreeLiveFilterPrefix" }, 0, prefix_length)
+    self:insert_highlight({ "NvimTreeLiveFilterValue" }, prefix_length, string.len(filter_line))
     self.index = self.index + 1
   end
 end
@@ -533,7 +541,8 @@ function Builder:setup_hidden_display_function(opts)
       local ok, result = pcall(hidden_display, hidden_stats)
       if not ok then
         notify.warn(
-          "Problem occurred in the function ``opts.renderer.hidden_display`` see nvim-tree.renderer.hidden_display on :h nvim-tree")
+          "Problem occurred in the function ``opts.renderer.hidden_display`` see nvim-tree.renderer.hidden_display on :h nvim-tree"
+        )
         return nil
       end
       return result
