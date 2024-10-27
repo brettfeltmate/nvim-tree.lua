@@ -259,14 +259,14 @@ function Builder:format_line(indent_markers, arrows, icon, name, node)
 
   add_to_end(line, { icon })
 
-  for i = #M.decorators, 1, -1 do
-    add_to_end(line, M.decorators[i]:icons_before(node))
+  for i = Builder.decorators, 1, -1 do
+    add_to_end(line, Builder.decorators[i]:icons_before(node))
   end
 
   add_to_end(line, { name })
 
-  for i = #M.decorators, 1, -1 do
-    add_to_end(line, M.decorators[i]:icons_after(node))
+  for i = Builder.decorators, 1, -1 do
+    add_to_end(line, Builder.decorators[i]:icons_after(node))
   end
 
   return line
