@@ -227,7 +227,7 @@ function Builder:format_line(indent_markers, arrows, icon, name, node)
     end
     for _, v in ipairs(t2) do
       if added_len > 0 then
-        table.insert(t1, { str = pad })
+        table.insert(t1, { str = M.opts.renderer.icons.padding })
       end
       table.insert(t1, v)
     end
@@ -259,18 +259,70 @@ function Builder:format_line(indent_markers, arrows, icon, name, node)
 
   add_to_end(line, { icon })
 
-  for i = #Builder.decorators, 1, -1 do
-    add_to_end(line, Builder.decorators[i]:icons_before(node))
+  for i = #M.decorators, 1, -1 do
+    add_to_end(line, M.decorators[i]:icons_before(node))
   end
 
   add_to_end(line, { name })
 
-  for i = #Builder.decorators, 1, -1 do
-    add_to_end(line, Builder.decorators[i]:icons_after(node))
+  for i = #M.decorators, 1, -1 do
+    add_to_end(line, M.decorators[i]:icons_after(node))
   end
 
   return line
 end
+-- function Builder:format_line(indent_markers, arrows, icon, name, node)
+--   local added_len = 0
+--   local function add_to_end(t1, t2)
+--     if not t2 then
+--       return
+--     end
+--     for _, v in ipairs(t2) do
+--       if added_len > 0 then
+--         table.insert(t1, { str = pad })
+--       end
+--       table.insert(t1, v)
+--     end
+--
+--     -- first add_to_end don't need padding
+--     -- hence added_len is calculated at the end to be used next time
+--     added_len = 0
+--     for _, v in ipairs(t2) do
+--       added_len = added_len + #v.str
+--     end
+--   end
+--
+--   local line = { indent_markers, arrows }
+--
+--   local arrow_index = 1
+--   local arrow_filenames = vim.g.arrow_filenames
+--   if arrow_filenames then
+--     for i, filename in ipairs(arrow_filenames) do
+--       if string.sub(node.absolute_path, -#filename) == filename then
+--         local statusline = require("arrow.statusline")
+--         arrow_index = statusline.text_for_statusline(_, i)
+--         line[1].str = string.sub(line[1].str, 1, -3)
+--         line[2].str = "(" .. arrow_index .. ") "
+--         line[2].hl = { "ArrowFileIndex" }
+--         break
+--       end
+--     end
+--   end
+--
+--   add_to_end(line, { icon })
+--
+--   for i = #Builder.decorators, 1, -1 do
+--     add_to_end(line, Builder.decorators[i]:icons_before(node))
+--   end
+--
+--   add_to_end(line, { name })
+--
+--   for i = #Builder.decorators, 1, -1 do
+--     add_to_end(line, Builder.decorators[i]:icons_after(node))
+--   end
+--
+--   return line
+-- end
 
 ---@private
 ---@param node Node
